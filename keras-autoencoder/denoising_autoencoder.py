@@ -1,7 +1,7 @@
 from keras.layers import Input, Dense, Flatten, Reshape
 from keras.models import Model, Sequential
 from keras.callbacks import Callback
-from keras.datasets import mnist
+from keras.datasets import fashion_mnist
 import numpy as np
 import wandb
 from wandb.keras import WandbCallback
@@ -21,7 +21,7 @@ config = run.config
 config.encoding_dim = 32
 config.epochs = 10
 
-(x_train, _), (x_test, _) = mnist.load_data()
+(x_train, _), (x_test, _) = fashion_mnist.load_data()
 (x_train_noisy, x_test_noisy) = add_noise(x_train, x_test)
 
 
@@ -34,6 +34,7 @@ model.add(Flatten(input_shape=(28,28)))
 model.add(Dense(config.encoding_dim, activation='relu'))
 model.add(Dense(784, activation='sigmoid'))
 model.add(Reshape((28,28)))
+
 model.compile(optimizer='adam', loss='mse')
 
 class Images(Callback):

@@ -1,4 +1,4 @@
-from keras.layers import Input, Dense, Flatten, Reshape
+from keras.layers import Input, Dense, Flatten, Reshape, UpSampling2D, Conv2D, MaxPooling2D
 from keras.models import Model, Sequential
 
 from keras.datasets import mnist
@@ -11,7 +11,7 @@ run = wandb.init()
 config = run.config
 
 config.encoding_dim = 32
-config.epochs = 1000
+config.epochs = 10
 
 (x_train, _), (x_test, _) = mnist.load_data()
 
@@ -19,11 +19,20 @@ x_train = x_train.astype('float32') / 255.
 x_test = x_test.astype('float32') / 255.
 
 model = Sequential()
-model.add(Flatten(input_shape=(28,28)))
-model.add(Dense(config.encoding_dim, activation='relu'))
-model.add(Dense(28*28, activation='sigmoid'))
+model.add(Reshape((28,28,1), input_shape=(28,28)))
+model.add(Conv2D(32, (2, 2), activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Conv2D(32, (2, 2), activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Flatten())
+model.add(Dense(18, activation='relu'))
+model.add(Dense(7*7, activation='relu'))
+model.add(Reshape((7,7,1)))
+model.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
+model.add(UpSampling2D())
+model.add(Conv2D(1, (3, 3), activation='sigmoid', padding='same'))
 model.add(Reshape((28,28)))
-model.compile(optimizer='adam', loss='mse')
+model.compile(optimizer='adam', loss='mae')
 
 model.summary()
 
